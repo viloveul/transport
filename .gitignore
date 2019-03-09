@@ -1,0 +1,5 @@
+vendor
+composer.lock
+sample/celery/__pycache__
+sample/socket.io/node_modules
+sample/socket.io/package-lock.json

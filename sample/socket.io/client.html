@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+	</head>
+	<body>
+	<div id="message-box" style="overflow-y: scroll; height: 100px; "></div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+	<script>
+		const socket = io('http://localhost:19914');
+		socket.on('new message', function(data){
+			document.getElementById('message-box').innerHTML += '<p>' + data.task +'</p>';
+		});
+	</script>
+	</body>
+</html>
