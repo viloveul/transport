@@ -20,6 +20,11 @@
             "Viloveul\\Transport\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "ViloveulTransportSample\\": "sample/"
+        }
+    },
     "require": {
         "php": "~7.0",
         "queue-interop/queue-interop": "^0.7|^0.8",
