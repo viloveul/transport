@@ -5,6 +5,7 @@ namespace Viloveul\Transport\Contracts;
 use Exception;
 use Interop\Queue\ConnectionFactory;
 use Interop\Queue\Context;
+use Viloveul\Transport\Contracts\Passenger;
 
 interface Bus
 {
@@ -17,6 +18,10 @@ interface Bus
      * @param string $name
      */
     public function build(string $name = 'default'): Context;
+    /**
+     * @param Passenger $passenger
+     */
+    public function process(Passenger $passenger): void;
 
     /**
      * @param string $name

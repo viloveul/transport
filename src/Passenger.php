@@ -2,9 +2,8 @@
 
 namespace Viloveul\Transport;
 
-use Exception;
 use Interop\Amqp;
-use Viloveul\Transport\Contracts\Bus as IBus;
+use Interop\Queue\Context;
 use Viloveul\Transport\Contracts\Passenger as IPassenger;
 
 abstract class Passenger implements IPassenger
@@ -12,17 +11,7 @@ abstract class Passenger implements IPassenger
     /**
      * @var mixed
      */
-    protected $bus;
-
-    /**
-     * @var mixed
-     */
     protected $context = null;
-
-    /**
-     * @var string
-     */
-    protected $driver = 'default';
 
     /**
      * @var mixed
@@ -49,17 +38,14 @@ abstract class Passenger implements IPassenger
      */
     private $attributes = [];
 
-    /**
-     * @param IBus $bus
-     */
-    public function __construct(IBus $bus)
-    {
-        $this->with($bus);
-    }
-
     public function __invoke()
     {
-        $this->process();
+        $this->run();
+    }
+
+    public function connection(): string
+    {
+        return 'default';
     }
 
     /**
@@ -81,32 +67,32 @@ abstract class Passenger implements IPassenger
 
     abstract public function handle(): void;
 
+    public function initialize(): void
+    {
+        $this->producer = $this->context->createProducer();
+    }
+
     abstract public function point(): string;
 
-    public function process(): void
+    public function run(): void
     {
-        try {
-            $this->initialize();
-            $this->handle();
-            $attributes = array_merge($this->attributes, [
-                'id' => uniqid(),
-                'task' => $this->task(),
-                'args' => $this->getArguments(),
-            ]);
-            $message = $this->context->createMessage(
-                json_encode($attributes)
-            );
-            $message->setContentType('application/json');
+        $this->handle();
+        $attributes = array_merge($this->attributes, [
+            'id' => 'viloveul_' . uniqid(),
+            'task' => $this->task(),
+            'args' => $this->getArguments(),
+        ]);
+        $message = $this->context->createMessage(
+            json_encode($attributes)
+        );
+        $message->setContentType('application/json');
 
-            if (is_null($this->queue)) {
-                $this->queue = $this->context->createQueue($this->point());
-                $this->queue->addFlag(Amqp\AmqpQueue::FLAG_DURABLE);
-            }
-            $this->context->declareQueue($this->queue);
-            $this->producer->send($this->queue, $message);
-        } catch (Exception $e) {
-            $this->bus->addException($e);
+        if (is_null($this->queue)) {
+            $this->queue = $this->context->createQueue($this->point());
+            $this->queue->addFlag(Amqp\AmqpQueue::FLAG_DURABLE);
         }
+        $this->context->declareQueue($this->queue);
+        $this->producer->send($this->queue, $message);
     }
 
     /**
@@ -128,17 +114,8 @@ abstract class Passenger implements IPassenger
 
     abstract public function task(): string;
 
-    /**
-     * @param IBus $bus
-     */
-    public function with(IBus $bus): void
+    public function with(Context $context): void
     {
-        $this->bus = $bus;
-    }
-
-    protected function initialize()
-    {
-        $this->context = $this->bus->build($this->driver);
-        $this->producer = $this->context->createProducer();
+        $this->context = $context;
     }
 }

@@ -18,7 +18,7 @@ broker.on('error', function(e) {
 
 // handle when connection rabbitmq ready
 broker.on('ready', () => {
-  broker.queue('message', {durable: true, autoDelete: false}, (queue) => {
+  broker.queue('system notification', {durable: true, autoDelete: false}, (queue) => {
     queue.subscribe(message => {
       io.emit('new message', message)
     })

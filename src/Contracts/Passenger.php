@@ -2,10 +2,15 @@
 
 namespace Viloveul\Transport\Contracts;
 
-use Viloveul\Transport\Contracts\Bus;
+use Interop\Queue\Context;
 
 interface Passenger
 {
+    /**
+     * @return mixed
+     */
+    public function connection(): string;
+
     /**
      * @return mixed
      */
@@ -17,7 +22,9 @@ interface Passenger
      */
     public function getAttribute($name, $default = null);
 
-    public function process(): void;
+    public function initialize(): void;
+
+    public function run(): void;
 
     /**
      * @param array $arguments
@@ -31,7 +38,7 @@ interface Passenger
     public function setAttribute($name, $value): void;
 
     /**
-     * @param Bus $bus
+     * @param Context $context
      */
-    public function with(Bus $bus): void;
+    public function with(Context $context): void;
 }

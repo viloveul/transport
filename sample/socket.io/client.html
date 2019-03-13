@@ -9,7 +9,7 @@
 	<script>
 		const socket = io('http://localhost:19914');
 		socket.on('new message', function(data){
-			document.getElementById('message-box').innerHTML += '<p>' + data.task +'</p>';
+			document.getElementById('message-box').innerHTML += '<p>' + JSON.stringify(data) +'</p>';
 		});
 	</script>
 	</body>
