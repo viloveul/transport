@@ -47,3 +47,19 @@ processing task
 ```php
 $bus->process(new TaskPassenger);
 ```
+
+
+## BACKEND (using Celery)
+
+```shell
+cd sample/celery
+celery -A tasks worker -Q system_notification --loglevel=info
+```
+
+## BACKEND (websocket)
+
+```shell
+cd sample/socket.io
+npm install
+npm start
+```
