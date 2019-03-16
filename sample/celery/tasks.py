@@ -11,7 +11,7 @@ smtp_host = 'smtp.gmail.com'
 app = Celery('tasks', broker = 'pyamqp://guest@localhost:5672//')
 
 # add worker name
-@app.task(name = 'send.email', bind = True, max_retries = 10)
+@app.task(name = 'my.task', bind = True, max_retries = 10)
 def sendEmail(self, email, message):
 	try:
 		srv = smtplib.SMTP_SSL(host=smtp_host, port=smtp_port)
