@@ -2,42 +2,44 @@
 
 namespace Viloveul\Transport\Contracts;
 
-use Exception;
-use Interop\Queue\ConnectionFactory;
+use Closure;
 use Interop\Queue\Context;
+use Interop\Queue\ConnectionFactory;
 use Viloveul\Transport\Contracts\Passenger;
+use Viloveul\Transport\Contracts\ErrorCollection;
 
 interface Bus
 {
     /**
-     * @param Exception $e
+     * @param $dsn
+     * @param string $name
      */
-    public function addException(Exception $e);
+    public function addConnection($dsn, string $name = 'default');
 
     /**
      * @param string $name
      */
     public function build(string $name = 'default'): Context;
+
     /**
-     * @param Passenger $passenger
+     * @param Closure $callback
      */
-    public function process(Passenger $passenger): void;
+    public function error(Closure $callback): ErrorCollection;
 
     /**
      * @param string $name
      */
     public function getConnection(string $name = 'default'): ConnectionFactory;
 
-    public function getExceptions();
-
     /**
      * @param string $name
      */
     public function hasConnection(string $name = 'default'): bool;
 
+    public function initialize(): void;
+
     /**
-     * @param $dsn
-     * @param string $name
+     * @param Passenger $passenger
      */
-    public function setConnection($dsn, string $name = 'default');
+    public function process(Passenger $passenger): void;
 }
