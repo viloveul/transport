@@ -2,12 +2,15 @@
 
 namespace Viloveul\Transport;
 
-use Enqueue\AmqpLib\AmqpConnectionFactory;
+use Closure;
 use Exception;
-use Interop\Queue\ConnectionFactory;
 use Interop\Queue\Context;
+use Interop\Queue\ConnectionFactory;
+use Viloveul\Transport\ErrorCollection;
+use Enqueue\AmqpLib\AmqpConnectionFactory;
 use Viloveul\Transport\Contracts\Bus as IBus;
 use Viloveul\Transport\Contracts\Passenger as IPassenger;
+use Viloveul\Transport\Contracts\ErrorCollection as IErrorCollection;
 
 class Bus implements IBus
 {
@@ -19,14 +22,24 @@ class Bus implements IBus
     /**
      * @var array
      */
-    protected $exceptions = [];
+    protected $errorCollection;
 
     /**
-     * @param Exception $e
+     * @var mixed
      */
-    public function addException(Exception $e)
+    protected $initialized = false;
+
+    /**
+     * @param $dsn
+     * @param string $name
+     */
+    public function addConnection($dsn, string $name = 'default'): void
     {
-        $this->exceptions[] = $e;
+        try {
+            $this->connections[$name] = new AmqpConnectionFactory($dsn);
+        } catch (Exception $e) {
+            $this->errorCollection->add($e);
+        }
     }
 
     /**
@@ -39,20 +52,24 @@ class Bus implements IBus
     }
 
     /**
+     * @param  Closure $callback
+     * @return mixed
+     */
+    public function error(Closure $callback = null): IErrorCollection
+    {
+        if ($callback === null) {
+            return $this->errorCollection;
+        }
+        return $callback($this->errorCollection);
+    }
+
+    /**
      * @param  string  $name
      * @return mixed
      */
     public function getConnection(string $name = 'default'): ConnectionFactory
     {
         return $this->connections[$name];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getExceptions(): array
-    {
-        return $this->exceptions;
     }
 
     /**
@@ -63,34 +80,26 @@ class Bus implements IBus
         return array_key_exists($name, $this->connections);
     }
 
+    public function initialize():void
+    {
+        $this->initialized = true;
+        if (!($this->errorCollection instanceof IErrorCollection)) {
+            $this->errorCollection = new ErrorCollection();
+        }
+    }
+
     /**
      * @param IPassenger $passenger
      */
     public function process(IPassenger $passenger): void
     {
         try {
-            $passenger->with(
-                $this->build(
-                    $passenger->connection()
-                )
-            );
+            $context = $this->build($passenger->connection());
+            $passenger->with($context);
             $passenger->initialize();
             $passenger->run();
         } catch (Exception $e) {
-            $this->addException($e);
-        }
-    }
-
-    /**
-     * @param $dsn
-     * @param string $name
-     */
-    public function setConnection($dsn, string $name = 'default'): void
-    {
-        try {
-            $this->connections[$name] = new AmqpConnectionFactory($dsn);
-        } catch (Exception $e) {
-            $this->addException($e);
+            $this->errorCollection->add($e);
         }
     }
 }

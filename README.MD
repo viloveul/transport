@@ -1,10 +1,3 @@
-## BROKER MESSAGE (RabbitMQ)
-run rabbit under docker
-```bash
-docker run --rm -p 5672:5672 rabbitmq:3
-# rabbitmq listen for port 5672
-```
-
 ## SETUP
 
 initilize bus connection for data transport
@@ -13,7 +6,7 @@ initilize bus connection for data transport
 use Viloveul\Transport\Bus;
 
 $bus = new Bus();
-$bus->setConnection('amqp://localhost:5672//');
+$bus->addConnection('amqp://localhost:5672//');
 ```
 
 declaring class passenger (for whatever your data)
@@ -40,6 +33,13 @@ class TaskPassenger extends Passenger
 		]);
 	}
 }
+```
+
+## BROKER MESSAGE (RabbitMQ)
+run rabbit under docker
+```bash
+docker run --rm -p 5672:5672 rabbitmq:3
+# rabbitmq listen for port 5672
 ```
 
 processing task
