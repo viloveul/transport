@@ -77,13 +77,14 @@ abstract class Passenger implements IPassenger
     public function run(): void
     {
         $this->handle();
-        $attributes = array_merge($this->attributes, [
+        $params = [
             'id' => 'viloveul_' . uniqid(),
             'task' => $this->task(),
-            'args' => $this->getArguments(),
-        ]);
+            'data' => $this->attributes,
+            'args' => $this->getArguments()
+        ];
         $message = $this->context->createMessage(
-            json_encode($attributes)
+            json_encode($params)
         );
         $message->setContentType('application/json');
 
