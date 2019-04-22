@@ -8,11 +8,9 @@ class TaskPassenger extends Passenger
 {
     public function handle(): void
     {
-        $this->setAttribute('data', [
-            'user_id' => 1,
-            'body' => [
-                'total' => 50,
-            ]
+        $this->setAttribute('user_id', 1);
+        $this->setAttribute('body', [
+            'total' => 50,
         ]);
         $this->setArguments(['your@mail.com', 'hello']);
     }
