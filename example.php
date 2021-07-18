@@ -3,6 +3,7 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 $bus = new Viloveul\Transport\Bus();
+$bus->initialize();
 $bus->addConnection('amqp://localhost:5672//');
 $bus->process(new ViloveulTransportSample\TaskPassenger);
 $error = $bus->error();

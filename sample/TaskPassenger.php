@@ -12,7 +12,11 @@ class TaskPassenger extends Passenger
         $this->setAttribute('body', [
             'total' => 50,
         ]);
-        $this->setArguments(['your@mail.com', 'hello']);
+    }
+
+    public function data(): string
+    {
+        return json_encode($this->getAttributes());
     }
 
     public function point(): string
@@ -20,7 +24,7 @@ class TaskPassenger extends Passenger
         return 'system_notification';
     }
 
-    public function task(): string
+    public function route(): string
     {
         return 'my.task';
     }

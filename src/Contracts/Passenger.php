@@ -11,10 +11,13 @@ interface Passenger
      */
     public function connection(): string;
 
-    /**
-     * @return mixed
-     */
-    public function getArguments(): array;
+    public function handle(): void;
+
+    public function data(): string;
+
+    public function route(): string;
+
+    public function point(): string;
 
     /**
      * @param $name
@@ -25,11 +28,6 @@ interface Passenger
     public function initialize(): void;
 
     public function run(): void;
-
-    /**
-     * @param array $arguments
-     */
-    public function setArguments(array $arguments): void;
 
     /**
      * @param $name

@@ -18,12 +18,17 @@ class TaskPassenger extends Passenger
 {
 	public function point(): string
 	{
-		return 'queue name';
+		return 'exchange name';
 	}
 
-	public function task(): string
+	public function route(): string
 	{
-		return 'task';
+		return 'routing.key';
+	}
+
+	public function data(): string
+	{
+		return 'string-data';
 	}
 
 	public function handle(): void
