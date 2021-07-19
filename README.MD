@@ -1,11 +1,17 @@
+```shell
+composer require viloveul/transport
+```
+
+
 ## SETUP
 
 initilize bus connection for data transport
 
 ```php
-use Viloveul\Transport\Bus;
+require_once __DIR__ . '/vendor/autoload.php';
 
-$bus = new Bus();
+$bus = new Viloveul\Transport\Bus();
+$bus->initialize();
 $bus->addConnection('amqp://localhost:5672//');
 ```
 
