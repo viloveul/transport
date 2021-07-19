@@ -58,7 +58,7 @@ $bus->process(new TaskPassenger);
 
 ```shell
 cd sample/celery
-celery -A tasks worker -Q system_notification --loglevel=info
+celery -A tasks worker --loglevel=info
 ```
 
 ## BACKEND (websocket)

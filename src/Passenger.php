@@ -5,6 +5,7 @@ namespace Viloveul\Transport;
 use Interop\Amqp;
 use Interop\Queue\Context;
 use Interop\Amqp\AmqpTopic;
+use Interop\Amqp\AmqpDestination;
 use Interop\Amqp\Impl\AmqpTopic as AmqpTopicImpl;
 use Viloveul\Transport\Contracts\Passenger as IPassenger;
 
@@ -24,6 +25,16 @@ abstract class Passenger implements IPassenger
      * @var mixed
      */
     protected $topic = null;
+
+    /**
+     * @var mixed
+     */
+    protected $durable = true;
+
+    /**
+     * @var mixed
+     */
+    protected $type = AmqpTopic::TYPE_TOPIC;
 
     /**
      * @var array
@@ -58,7 +69,10 @@ abstract class Passenger implements IPassenger
     {
         $this->producer = $this->context->createProducer();
         $this->topic = new AmqpTopicImpl($this->point());
-        $this->topic->setType(AmqpTopic::TYPE_TOPIC);
+        $this->topic->setType($this->type);
+        if ($this->durable) {
+            $this->topic->addflag(AmqpDestination::FLAG_DURABLE);
+        }
         $this->context->declareTopic($this->topic);
     }
 
