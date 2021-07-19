@@ -4,6 +4,9 @@ namespace Viloveul\Transport;
 
 use Interop\Amqp;
 use Interop\Queue\Context;
+use Interop\Amqp\AmqpTopic;
+use Interop\Amqp\AmqpDestination;
+use Interop\Amqp\Impl\AmqpTopic as AmqpTopicImpl;
 use Viloveul\Transport\Contracts\Passenger as IPassenger;
 
 abstract class Passenger implements IPassenger
@@ -21,17 +24,17 @@ abstract class Passenger implements IPassenger
     /**
      * @var mixed
      */
-    protected $queue = null;
+    protected $topic = null;
 
     /**
      * @var mixed
      */
-    protected $topic = null;
+    protected $durable = true;
 
     /**
-     * @var array
+     * @var mixed
      */
-    private $arguments = [];
+    protected $type = AmqpTopic::TYPE_TOPIC;
 
     /**
      * @var array
@@ -48,12 +51,9 @@ abstract class Passenger implements IPassenger
         return 'default';
     }
 
-    /**
-     * @return mixed
-     */
-    public function getArguments(): array
+    public function getAttributes(): array
     {
-        return $this->arguments;
+        return $this->attributes;
     }
 
     /**
@@ -65,43 +65,24 @@ abstract class Passenger implements IPassenger
         return array_key_exists($name, $this->attributes) ? $this->attributes[$name] : $default;
     }
 
-    abstract public function handle(): void;
-
     public function initialize(): void
     {
         $this->producer = $this->context->createProducer();
+        $this->topic = new AmqpTopicImpl($this->point());
+        $this->topic->setType($this->type);
+        if ($this->durable) {
+            $this->topic->addflag(AmqpDestination::FLAG_DURABLE);
+        }
+        $this->context->declareTopic($this->topic);
     }
-
-    abstract public function point(): string;
 
     public function run(): void
     {
         $this->handle();
-        $params = [
-            'id' => 'viloveul_' . uniqid(),
-            'task' => $this->task(),
-            'data' => $this->attributes,
-            'args' => $this->getArguments()
-        ];
-        $message = $this->context->createMessage(
-            json_encode($params)
-        );
+        $message = $this->context->createMessage($this->data());
         $message->setContentType('application/json');
-
-        if (is_null($this->queue)) {
-            $this->queue = $this->context->createQueue($this->point());
-            $this->queue->addFlag(Amqp\AmqpQueue::FLAG_DURABLE);
-        }
-        $this->context->declareQueue($this->queue);
-        $this->producer->send($this->queue, $message);
-    }
-
-    /**
-     * @param array $arguments
-     */
-    public function setArguments(array $arguments): void
-    {
-        $this->arguments = array_values($arguments);
+        $message->setRoutingKey($this->route());
+        $this->producer->send($this->topic, $message);
     }
 
     /**
@@ -112,8 +93,6 @@ abstract class Passenger implements IPassenger
     {
         $this->attributes[$name] = $value;
     }
-
-    abstract public function task(): string;
 
     public function with(Context $context): void
     {

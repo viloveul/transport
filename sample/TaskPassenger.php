@@ -6,22 +6,32 @@ use Viloveul\Transport\Passenger;
 
 class TaskPassenger extends Passenger
 {
+    protected $type = 'direct';
+
     public function handle(): void
     {
-        $this->setAttribute('user_id', 1);
-        $this->setAttribute('body', [
-            'total' => 50,
+
+    }
+
+    public function data(): string
+    {
+        return json_encode([
+            'id' => uniqid(),
+            'task' => 'my.task',
+            'kwargs' => [
+                'foo' => 'Fajrul',
+                'bar' => 'Viloveul'
+            ]
         ]);
-        $this->setArguments(['your@mail.com', 'hello']);
     }
 
     public function point(): string
     {
-        return 'system_notification';
+        return 'celery';
     }
 
-    public function task(): string
+    public function route(): string
     {
-        return 'my.task';
+        return 'celery';
     }
 }

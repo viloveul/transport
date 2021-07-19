@@ -38,8 +38,11 @@ class ErrorCollection implements IErrorCollection
         return count($this->errors);
     }
 
-    public function top(): Exception
+    public function top(): ?Exception
     {
-        return current($this->errors);
+        if (!empty($this->errors)) {
+            return current($this->errors);
+        }
+        return null;
     }
 }
