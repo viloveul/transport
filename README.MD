@@ -18,12 +18,17 @@ class TaskPassenger extends Passenger
 {
 	public function point(): string
 	{
-		return 'queue name';
+		return 'exchange name';
 	}
 
-	public function task(): string
+	public function route(): string
 	{
-		return 'task';
+		return 'routing.key';
+	}
+
+	public function data(): string
+	{
+		return 'string-data';
 	}
 
 	public function handle(): void
@@ -53,7 +58,7 @@ $bus->process(new TaskPassenger);
 
 ```shell
 cd sample/celery
-celery -A tasks worker -Q system_notification --loglevel=info
+celery -A tasks worker --loglevel=info
 ```
 
 ## BACKEND (websocket)

@@ -16,5 +16,5 @@ interface ErrorCollection extends Countable
 
     public function clear(): void;
 
-    public function top(): Exception;
+    public function top(): ?Exception;
 }
